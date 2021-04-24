@@ -1,5 +1,6 @@
 {
   "pages": [
+    "pages/home/home",
     "pages/chat-list/chat-list",
     "pages/chat/chat",
     "pages/chat-input/chat-input",
@@ -15,6 +16,12 @@
     "selectedColor": "#35c8fb",
     "color": "#7f8389",
     "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "HOME",
+        "iconPath": "image/tabbar/chat_list_unselected.png",
+        "selectedIconPath": "image/tabbar/chat_list.png"
+      },
       {
         "pagePath": "pages/chat-list/chat-list",
         "text": "会话列表",
