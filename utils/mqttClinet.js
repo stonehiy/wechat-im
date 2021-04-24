@@ -1,5 +1,7 @@
 
 import mqtt from '../libs/mqtt/mqtt'
+import mybuffer from '../libs/mqtt/mybuffer'
+console.log(mybuffer);
 const mqttClient = {
     ws: {},
     pramas: {},
@@ -60,9 +62,10 @@ const mqttClient = {
           options: {},
         }, data)
         if (data.topic === '') console.error('[publish.topic] can not be undefined')
-       
-        console.log('发送数据:', new Uint8Array(data.encryptedData))
-        this.ws.publish(data.topic, new Uint8Array(data.encryptedData), Object.assign({ qos: 0 }, data.options), (err) => {
+       const b = mybuffer.Buffer.from(data.encryptedData)
+          console.log('发送数据:', b)
+        // console.log('发送数据:', new Uint8Array(data.encryptedData))
+        this.ws.publish(data.topic, /*new Uint8Array(data.encryptedData)*/b, Object.assign({ qos: 0 }, data.options), (err) => {
           if (err) {
             console.log(err)
           } else {
