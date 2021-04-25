@@ -42,7 +42,7 @@ export default {
      * 数组进行异或
      * @param {Array} arr 数组
      */
-    BytesDes (arr) {
+    bytesDes (arr) {
       var des = arr[0]
       for (var i = 1; i < arr.length; i++) {
         des ^= arr[i]
@@ -53,7 +53,7 @@ export default {
      * 十六进制数组转十进制数组
      * @param {Array} arr 十六进制数组
      */
-    Array16to10 (arr) {
+    array16to10 (arr) {
       var list = []
       arr.forEach(element => {
         list = [
@@ -126,5 +126,24 @@ export default {
         arr = this.Str2Bytes(this.toHex(int))
       }
       return arr
+    },
+
+    /**
+     *  方法3:apply(推荐）
+     * a.push.apply(a,b);
+     * 方法4:es6的写法（推荐
+     * a.push(...b)；
+     * @param  {...any} arr
+     */
+
+
+    
+    arrayConcat(){
+     
+      for(let index in arguments) {
+        result += arguments[index];
+      }
+
+      arr.push.apply(arr,b);
     }
 }
