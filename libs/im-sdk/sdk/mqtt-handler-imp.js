@@ -1,5 +1,5 @@
 import IIMHandler from "../interface/i-im-handler";
-import IQmttEvent from "../interface/i-qmtt-event";
+// import IQmttEvent from "../interface/i-qmtt-event";
 import mqttClinet from "../../../utils/mqttClinet";
 
 export default class MqttHandlerImp extends IIMHandler {
@@ -83,4 +83,13 @@ export default class MqttHandlerImp extends IIMHandler {
         console.log("_onSocketMessage err = ", err);
       });
   }
+
+  onSubscribe(topic, options, callback = function () {}){
+    mqttClinet.subscribe(topic,Object.assign({ qos: 0 }, options),callback)
+  }
+
+  onUnsubscribe(topic, options, callback = function () {}){
+    mqttClinet.unsubscribe(topic,Object.assign({ qos: 0 }, options),callback)
+  }
+  
 }

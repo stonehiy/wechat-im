@@ -8,6 +8,7 @@ import IQmttEvent from "./i-qmtt-event"
  */
 export default class IIMHandler extends IQmttEvent{
     constructor() {
+        super();
         this._isLogin = true;
         this._msgQueue = [];
         this._receiveListener = null;

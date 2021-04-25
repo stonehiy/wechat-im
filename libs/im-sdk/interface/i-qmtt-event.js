@@ -1,8 +1,6 @@
-export default class IQmttEvent{
-    onSubscribe(){
+export default class IQmttEvent {
+  constructor() {}
 
-    }
-    onUnsubscribe(){
-        
-    }
+  onSubscribe(topic, options, callback = function () {}) {}
+  onUnsubscribe(topic, options, callback = function () {}) {}
 }

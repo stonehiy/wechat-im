@@ -3,27 +3,29 @@ import mqttClient from "../../utils/mqttClinet";
 import imcontent from "../../utils/imcontent";
 // import ab from '../../utils/ab'
 
+const imHandler = getApp().getIMHandler();
+
 Page({
   data: {},
 
   onLoad(options) {
-    
     //    mqttClient.initMqtt({id:"wx_121212"})
     //    mqttClient.checkState(e=>{
     //     mqttClient.subscribe("wx/pc",err=>{
-
     //     })
     //    })
   },
 
   async onShow() {
-    getApp()
-      .getIMHandler()
-      .setOnReceiveMessageListener({
-        listener: (msg) => {
-          console.log(msg);
-        },
-      });
+    imHandler.setOnReceiveMessageListener({
+      listener: (msg) => {
+        console.log(msg);
+      },
+    });
+    const topic =  "wx/pc"
+    imHandler.onSubscribe(topic,{},(err)=>{
+     console.log(`${topic} onSubscribe success ${err}`);
+    });
   },
 
   async onTap() {
@@ -40,22 +42,20 @@ Page({
     // });
 
     try {
-        await getApp()
-          .getIMHandler()
-          .sendMsg({
-            content: {
-                topic: "wx/wx",
-                msgBody: {
-                    type: 0x00,
-                    from: "10",
-                    to: "20",
-                    timestamp: "30",
-                    content: "content",
-                  },
-            },
-          });
-      } catch (e) {
-        console.log("e = ", e);
-      }
+      await imHandler.sendMsg({
+        content: {
+          topic: "wx/wx",
+          msgBody: {
+            type: 0x00,
+            from: "10",
+            to: "20",
+            timestamp: "30",
+            content: "content",
+          },
+        },
+      });
+    } catch (e) {
+      console.log("e = ", e);
+    }
   },
 });

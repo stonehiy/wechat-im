@@ -137,7 +137,7 @@ const mqttClient = {
         reject("data error");
         return;
       }
-      console.log("send hex data :", buf.toString('hex'));
+      console.log(`${data.topic} send hex data :`, buf.toString('hex'));
       // console.log("发送数据:", buf);
       this.ws.publish(
         data.topic,
