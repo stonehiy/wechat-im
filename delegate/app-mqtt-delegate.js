@@ -1,4 +1,4 @@
-import {getIMHandlerFactory} from "../libs/im-sdk/im-qmtt-factory";
+import mqttClinet from "../utils/mqttClinet";
 
 export default class AppIMDelegate {
     constructor(app) {
@@ -10,7 +10,7 @@ export default class AppIMDelegate {
     }
 
     onShow(options) {
-        this.iIMHandler.createConnection({options: {url: 'wx://127.0.0.1'}});
+        this.iIMHandler.createConnection({options: {url: 'ws://10.4.35.187:8001'}});
     }
 
     onHide() {

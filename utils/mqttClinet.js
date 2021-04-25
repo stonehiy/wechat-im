@@ -1,12 +1,14 @@
 import mqtt from "../libs/mqtt/mqtt";
 import mybuffer from "../libs/mqtt/mybuffer";
-console.log(mybuffer);
+import { body2Buffer, buffer2MsgBody } from "./imcontent";
+
 const mqttClient = {
   ws: {},
   pramas: {},
   initMqtt(options) {
     this.pramas = Object.assign(
       {
+        url: "wx://127.0.0.1",
         port: 1884,
         keepalive: 60,
         clientId: options.id,
@@ -17,10 +19,12 @@ const mqttClient = {
       },
       options
     );
-    this.ws = mqtt("wx://127.0.0.1", this.pramas);
+    this.ws = mqtt(this.pramas.url, this.pramas);
+
+    /*
     this.ws.on("connect", (e) => {
       // if (Reflect.has(Dialog, 'close'))Dialog.close()
-      console.log(`${this.pramas.clientId}连接成功`);
+      console.log(`${this.pramas.clientId}连接成功:${e}`);
     });
     this.ws.on("error", (e) => {
       console.log("error", e);
@@ -36,21 +40,72 @@ const mqttClient = {
     });
     this.ws.on("message", (topic, payload) => {
       console.log("%c收到message，解密前原始数据", "color:#0088f5", payload);
-      //let data = common.decryptedData(payload)
-      console.log("%c解密完成数据：", "color:#0088f5;", data);
+      // const buf =mybuffer.Buffer.from(payload)
+      // console.log("%c解密完成数据：", "color:#0088f5;", buf);
     });
+    */
   },
-  checkState(success = function () {}) {
+  onConnect(success = function () {}) {
     this.ws.on("connect", (e) => {
-      console.log(`${this.pramas.clientId}连接成功`);
+      console.log(`connectState ${this.pramas.clientId}连接成功:${e}`);
       success(e);
     });
+  },
+  onError(error = function () {}) {
+    this.ws.on("error", (e) => {
+      error(e);
+    });
+  },
+  onOffline(offline = function () {}) {
+    this.ws.on("offline", (e) => {
+      offline(e);
+    });
+  },
+  onDisconnect(disconnect = function () {}) {
+    this.ws.on("offline", (e) => {
+      disconnect(e);
+    });
+  },
+  onClose(close = function () {}) {
+    this.ws.on("close", (e) => {
+      close(e);
+    });
+  },
+  onMessage() {
+    return new Promise((resolve, reject) => {
+      this.ws.on("message", (topic, payload) => {
+        console.log("%c收到message，解密前原始数据", "color:#0088f5", payload);
+        const buf = mybuffer.Buffer.from(payload);
+        const msg = buffer2MsgBody(buf);
+        if (null != msg) {
+          resolve(msg);
+        } else {
+          reject("非协议消息");
+        }
+        console.log("%c解密完成数据：", "color:#0088f5;", msg);
+      });
+    });
+  },
+
+  publishMsgBody(data) {
+    data = Object.assign(
+      {
+        topic: "",
+        encryptedData: [],
+        options: {},
+        msgBody: {},
+      },
+      data
+    );
+    const buf = body2Buffer(data.msgBody);
+    data.encryptedData = buf;
+    return this.publish(data);
   },
   /**
    * 自定义mqtt publish (9)
    * @param {Object} data 总数据
    * @param {String} data.topic topic
-   * @param {Array} data.encryptedData 加密数据
+   * @param {Array|Buffer} data.encryptedData body数据
    * @param {Object} data.options mqtt publish options
    * @param {Object} data.timeOut 超时时间
    */
@@ -59,14 +114,16 @@ const mqttClient = {
       data = Object.assign(
         {
           topic: "",
-          dataType: "Buffer",
           encryptedData: [],
           options: {},
         },
         data
       );
-      if (data.topic === "")
+      if (data.topic === "") {
         console.error("[publish.topic] can not be undefined");
+        reject("topic data error");
+        return;
+      }
 
       let buf;
       if (Array.isArray(data.encryptedData)) {
@@ -77,9 +134,11 @@ const mqttClient = {
         buf = data.encryptedData;
       } else {
         console.error("[publish.encryptedData] is not Array or Buffer");
+        reject("data error");
         return;
       }
-      console.log("发送数据:", buf);
+      console.log("send hex data :", buf.toString('hex'));
+      // console.log("发送数据:", buf);
       this.ws.publish(
         data.topic,
         buf,
@@ -87,8 +146,10 @@ const mqttClient = {
         (err) => {
           if (err) {
             console.log(err);
+            reject(err);
           } else {
             console.log("%c数据发送成功", "color:#ea3800");
+            resolve("send data success!");
           }
         }
       );
@@ -116,7 +177,6 @@ const mqttClient = {
   /**
    * 自定义mqtt sendMessage (11)
    * @param {Object} t 总数据
-   * @param {Object} t._this vue实例
    * @param {Array} t.data 加密前数据
    * @param {String} t.equiImei 设备Imei
    * @param {Boolean} t.showInterval 展示定时器
@@ -132,7 +192,6 @@ const mqttClient = {
     return new Promise((resolve, reject) => {
       t = Object.assign(
         {
-          _this: null,
           data: [],
           equiImei: "",
           showInterval: !0,

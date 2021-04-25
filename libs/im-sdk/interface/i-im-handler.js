@@ -1,12 +1,14 @@
+import IQmttEvent from "./i-qmtt-event"
+
 /**
  * 由于JavaScript没有接口的概念，所以我编写了这个IM基类
  * 将你自己的IM的实现类继承这个类就可以了
  * 我把IM通信的常用方法封装在这里，
  * 有些实现了具体细节，但有些没实现，是作为抽象函数，由子类去实现细节，这点是大家需要注意的
  */
-export default class IIMHandler {
+export default class IIMHandler extends IQmttEvent{
     constructor() {
-        this._isLogin = false;
+        this._isLogin = true;
         this._msgQueue = [];
         this._receiveListener = null;
     }
