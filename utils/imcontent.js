@@ -1,6 +1,6 @@
 import mybuffer from "../libs/mqtt/mybuffer";
 import Long from "../libs/mqtt/long";
-import ab from "./ab"
+import ab from "./ab";
 
 /*
 export default {
@@ -17,7 +17,21 @@ export default {
 };
 */
 export class MsgBody {
-  constructor(flag, type, from, to, timestamp, content) {
+  static FlAG_IM = 0x7f;
+
+  static TYPE_TEXT = 0x01;
+  static TYPE_IMAGE = 0x02;
+  static TYPE_VOICE = 0x03;
+  static TYPE_VIDEO = 0x04;
+
+  constructor(
+    type,
+    from,
+    to,
+    content,
+    timestamp = new Date().getTime().toString(),
+    flag = MsgBody.FlAG_IM
+  ) {
     this.flag = flag;
     this.type = type;
     this.from = from;
@@ -27,18 +41,46 @@ export class MsgBody {
   }
 }
 
+export class PubPackage {
+  constructor(
+    topic,
+    msgBody,
+    options = new PubPackageOptions(),
+    callback = function (err) {}
+  ) {
+    this.topic = topic;
+    this.options = options;
+    this.msgBody = msgBody;
+    this.callback = callback;
+  }
+}
+export class PubPackageOptions {
+  constructor(qos = Qos.AT_MOST_ONCE, retain = false, dup = false) {
+    this.qos = qos;
+    this.retain = retain;
+    this.dup = dup;
+  }
+}
+
+export const Qos = {
+  AT_MOST_ONCE: 0, //
+  AT_LEAST_ONCE: 1, //
+  EXACTLY_ONCE: 2,
+};
+
+/**
+ * 
+ * @param {MsgBoy} body 
+ * @returns 
+ */
 export function body2Buffer(body) {
-  body = Object.assign(
-    {
-      flag: 0x7f,
-      type: 0x00,
-      from: "0",
-      to: "0",
-      timestamp: "0",
-      content: "",
-    },
-    body
-  );
+ //let body = Object.assign(
+  //  {
+   //   flag: MsgBody.Flag_IM,
+  //    type: MsgBody.TYPE_TEXT,
+  //  },
+  //  msgBody
+ // );
   const fromLong = Long.fromString(body.from);
   const toLong = Long.fromString(body.to);
   const timestampLong = Long.fromString(body.timestamp);
@@ -49,24 +91,6 @@ export function body2Buffer(body) {
   const to = mybuffer.Buffer.from(toLong.toBytes());
   const timestamp = mybuffer.Buffer.from(timestampLong.toBytes());
   const content = mybuffer.Buffer.from(body.content);
-
-  const len =
-    flag.length +
-    type.length +
-    from.length +
-    to.length +
-    timestamp.length +
-    content.length;
-  console.log(
-    "len = ",
-    flag.length,
-    type.length,
-    from.length,
-    to.length,
-    timestamp.length,
-    content.length
-  );
-
   return mybuffer.Buffer.concat([flag, type, from, to, timestamp, content]);
 }
 
@@ -76,27 +100,40 @@ export function buffer2MsgBody(buffer) {
   }
 
   const flag = buffer.readUInt8(0);
+  if (flag !== MsgBody.Flag_IM) {
+    return null;
+  }
 
   const type = buffer.readUInt8(1);
 
   const fromH = buffer.readUInt32BE(2);
   const fromL = buffer.readUInt32BE(6);
-  const from = new Long(fromL,fromH)
+  const from = new Long(fromL, fromH);
 
   const toH = buffer.readUInt32BE(10);
   const toL = buffer.readUInt32BE(14);
-  const to = new Long(toL,toH)
+  const to = new Long(toL, toH);
 
   const timestampH = buffer.readUInt32BE(18);
   const timestampL = buffer.readUInt32BE(22);
-  const timestam = new Long(timestampL,timestampH)
+  const timestam = new Long(timestampL, timestampH);
 
-  const content = buffer.toString(26,buffer.length)
+  const content = buffer.toString("utf8", 26);
 
-  return new MsgBody(flag,type,from.toString(),to.toString(),timestam.toString(),content);
+  return new MsgBody(
+    flag,
+    type,
+    from.toString(),
+    to.toString(),
+    timestam.toString(),
+    content
+  );
 }
 
 export default {
+  PubPackageOptions,
+  PubPackage,
+  Qos,
   MsgBody,
   body2Buffer,
   buffer2MsgBody,

@@ -1,6 +1,11 @@
-import mqttClient from "../../utils/mqttClinet";
+// import mqttClient from "../../utils/mqttClinet";
 // import mybuffer from '../../libs/mqtt/mybuffer'
-import imcontent from "../../utils/imcontent";
+import {
+  MsgBody,
+  PubPackage,
+  PubPackageOptions,
+  Qos,
+} from "../../utils/imcontent";
 // import ab from '../../utils/ab'
 
 const imHandler = getApp().getIMHandler();
@@ -22,9 +27,9 @@ Page({
         console.log(msg);
       },
     });
-    const topic =  "wx/pc"
-    imHandler.onSubscribe(topic,{},(err)=>{
-     console.log(`${topic} onSubscribe success ${err}`);
+    const topic = "wx/pc";
+    imHandler.onSubscribe(topic, {}, (err) => {
+      console.log(`${topic} onSubscribe success ${err}`);
     });
   },
 
@@ -42,17 +47,19 @@ Page({
     // });
 
     try {
+      let from = new Date().getTime() + 1;
+      let to = new Date().getTime() + 2;
+      const msg = new MsgBody(
+        MsgBody.TYPE_IMAGE,
+        from.toString(),
+        to.toString(),
+        "mmmmmmmm12341234123"
+      );
+      const pp = new PubPackage("wx/wx", msg, {}, (err) => {
+        console.log(err);
+      });
       await imHandler.sendMsg({
-        content: {
-          topic: "wx/wx",
-          msgBody: {
-            type: 0x00,
-            from: "10",
-            to: "20",
-            timestamp: "30",
-            content: "content",
-          },
-        },
+        content: pp,
       });
     } catch (e) {
       console.log("e = ", e);
