@@ -1,6 +1,6 @@
 import mqtt from "../libs/mqtt/mqtt";
 import mybuffer from "../libs/mqtt/mybuffer";
-import { body2Buffer, buffer2MsgBody } from "./imcontent";
+import { body2Buffer, buffer2MsgBody, ReMessage } from "./imcontent";
 
 const mqttClient = {
   ws: {},
@@ -11,7 +11,7 @@ const mqttClient = {
         url: "wx://127.0.0.1",
         port: 1884,
         keepalive: 60,
-        clientId: options.id,
+        clientId: "",
         clean: true,
         username: "",
         password: "",
@@ -19,6 +19,7 @@ const mqttClient = {
       },
       options
     );
+    console.log(this.pramas);
     this.ws = mqtt(this.pramas.url, this.pramas);
 
     /*
@@ -71,19 +72,20 @@ const mqttClient = {
       close(e);
     });
   },
-  onMessage() {
-    return new Promise((resolve, reject) => {
-      this.ws.on("message", (topic, payload) => {
-        console.log("%c收到message，解密前原始数据", "color:#0088f5", payload);
-        const buf = mybuffer.Buffer.from(payload);
-        const msg = buffer2MsgBody(buf);
-        if (null != msg) {
-          resolve(msg);
-        } else {
-          reject("非协议消息");
-        }
-        console.log("%c解密完成数据：", "color:#0088f5;", msg);
-      });
+  onMessage(success = function(msgAll){},error = function(){}) {
+    this.ws.on("message", (topic, payload) => {
+      console.log("%c收到原始数据：", "color:#0088f5", payload);
+      const buf = mybuffer.Buffer.from(payload);
+      const msg = buffer2MsgBody(buf);
+      const msgAll = new ReMessage();
+      msgAll.topic = topic;
+      msgAll.msg =msg
+      if (null != msg) {
+        success(msgAll)
+      } else {
+        error("data is null")
+      }
+      console.log("%c解析后的数据：", "color:#0088f5;", msgAll);
     });
   },
 
@@ -138,7 +140,7 @@ const mqttClient = {
         return;
       }
       console.log(`${data.topic} send msg data :`, data);
-      console.log(`${data.topic} send hex data :`, buf.toString('hex'));
+      console.log(`${data.topic} send hex data :`, buf.toString("hex"));
       // console.log("发送数据:", buf);
       this.ws.publish(
         data.topic,

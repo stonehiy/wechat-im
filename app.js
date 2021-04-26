@@ -20,7 +20,9 @@ if("devtools" != platform){
 
 App({
     globalData: {
-        userInfo: {},
+        userInfo: {
+            userId:"123123"
+        },
     },
     getIMHandler() {
         return this.appIMDelegate.getIMHandlerDelegate();

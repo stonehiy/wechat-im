@@ -11,7 +11,9 @@ import {
 const imHandler = getApp().getIMHandler();
 
 Page({
-  data: {},
+  data: {
+    text: "text view",
+  },
 
   onLoad(options) {
     //    mqttClient.initMqtt({id:"wx_121212"})
@@ -22,14 +24,12 @@ Page({
   },
 
   async onShow() {
+
+    let that = this;
     imHandler.setOnReceiveMessageListener({
       listener: (msg) => {
-        console.log(msg);
+        console.log("home msg =", msg);
       },
-    });
-    const topic = "wx/pc";
-    imHandler.onSubscribe(topic, {}, (err) => {
-      console.log(`${topic} onSubscribe success ${err}`);
     });
   },
 

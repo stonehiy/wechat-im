@@ -68,19 +68,26 @@ export const Qos = {
   EXACTLY_ONCE: 2,
 };
 
+export class ReMessage {
+  constructor(topic, msg) {
+    this.topic = topic;
+    this.msg = msg;
+  }
+}
+
 /**
- * 
- * @param {MsgBoy} body 
- * @returns 
+ *
+ * @param {MsgBoy} body
+ * @returns
  */
 export function body2Buffer(body) {
- //let body = Object.assign(
+  //let body = Object.assign(
   //  {
-   //   flag: MsgBody.Flag_IM,
+  //   flag: MsgBody.Flag_IM,
   //    type: MsgBody.TYPE_TEXT,
   //  },
   //  msgBody
- // );
+  // );
   const fromLong = Long.fromString(body.from);
   const toLong = Long.fromString(body.to);
   const timestampLong = Long.fromString(body.timestamp);
@@ -100,7 +107,7 @@ export function buffer2MsgBody(buffer) {
   }
 
   const flag = buffer.readUInt8(0);
-  if (flag !== MsgBody.Flag_IM) {
+  if (flag !== MsgBody.FlAG_IM) {
     return null;
   }
 
@@ -131,6 +138,7 @@ export function buffer2MsgBody(buffer) {
 }
 
 export default {
+  ReMessage,
   PubPackageOptions,
   PubPackage,
   Qos,
