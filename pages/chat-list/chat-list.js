@@ -16,7 +16,7 @@ Page({
         friendId: "666666",
         friendHeadUrl:
           "https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3155998395,3600507640&fm=26&gp=0.jpg",
-        unread: "",
+        unread: "2",
         friendName: "小明",
         content: "",
         timeStr: "",
@@ -25,7 +25,7 @@ Page({
         friendId: "77777",
         friendHeadUrl:
           "https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fn.sinaimg.cn%2Fsinacn11%2F600%2Fw700h700%2F20180424%2F514b-fzqvvsa3694420.jpg&refer=http%3A%2F%2Fn.sinaimg.cn&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1622017552&t=0c51c2aedb57456f2e057e263e43ad38",
-        unread: "",
+        unread: "3",
         friendName: "小红",
         content: "",
         timeStr: "",
@@ -56,14 +56,17 @@ Page({
       .getIMHandler()
       .setOnReceiveMessageListener({
         listener: (msg) => {
+          const topic = msg.topic;
+          const mm = msg.msg;
+
           const newItem = {
-            friendId: msg.from,
+            friendId: mm.from,
             friendHeadUrl:
               "https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3155998395,3600507640&fm=26&gp=0.jpg",
-            unread: "",
-            friendName: msg.from,
-            content: msg.content,
-            timeStr: msg.timestamp,
+            unread: "1",
+            friendName: mm.from,
+            content: mm.content,
+            timeStr: mm.timestamp,
           };
 
           that.setData({
@@ -86,11 +89,17 @@ Page({
 
   conversationsItem(newItem) {
     let list = this.data.conversations;
+    console.log("list -> ", list);
     list = list.filter((item) => {
-      return item.friendId != newItem.friendId;
+      if (item.friendId == newItem.friendId) {
+        newItem.unread = item.unread + 1;
+        return false;
+      } else {
+        return true;
+      }
     });
-
-    return Array.prototype.push.apply(list, [newItem]);
+    Array.prototype.push.apply(list, [newItem]);
+    return list;
   },
   getConversationsItem(item) {
     let { latestMsg, ...msg } = item;

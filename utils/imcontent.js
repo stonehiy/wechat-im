@@ -25,12 +25,13 @@ export class MsgBody {
   static TYPE_VIDEO = 0x04;
 
   constructor(
+    flag = MsgBody.FlAG_IM,
     type,
     from,
     to,
-    content,
     timestamp = new Date().getTime().toString(),
-    flag = MsgBody.FlAG_IM
+    content,
+ 
   ) {
     this.flag = flag;
     this.type = type;
