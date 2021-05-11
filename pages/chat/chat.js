@@ -32,7 +32,7 @@ Page({
      * 生命周期函数--监听页面加载
      */
     onLoad(options) {
-
+        console.log("options.friend = ",options.friend)
         const friend = JSON.parse(options.friend);
         console.log(friend);
         this.setData({

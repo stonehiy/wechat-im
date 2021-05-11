@@ -43,6 +43,8 @@ Page({
     delete item.latestMsg;
     delete item.unread;
     delete item.content;
+    delete item.friendHeadUrl;
+
     wx.navigateTo({
       url: `../chat/chat?friend=${JSON.stringify(item)}`,
     });
@@ -89,7 +91,7 @@ Page({
 
   conversationsItem(newItem) {
     let list = this.data.conversations;
-    console.log("list -> ", list);
+ 
     list = list.filter((item) => {
       if (item.friendId == newItem.friendId) {
         newItem.unread = item.unread + 1;
