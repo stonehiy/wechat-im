@@ -16,11 +16,7 @@ Page({
   },
 
   onLoad(options) {
-    //    mqttClient.initMqtt({id:"wx_121212"})
-    //    mqttClient.checkState(e=>{
-    //     mqttClient.subscribe("wx/pc",err=>{
-    //     })
-    //    })
+   
   },
 
   async onShow() {
@@ -47,15 +43,13 @@ Page({
     // });
 
     try {
-      let from = new Date().getTime() + 1;
-      let to = new Date().getTime() + 2;
-      const msg = new MsgBody(
-        MsgBody.TYPE_IMAGE,
-        from.toString(),
-        to.toString(),
-        "mmmmmmmm12341234123"
+      const msg = new MsgBody({
+        type:MsgBody.TYPE_TEXT,
+        from:"666666",
+        to:"123123",
+        content:"TYPE_TEXT mmmmmmmm 12341234123"}
       );
-      const pp = new PubPackage("wx/wx", msg, {}, (err) => {
+      const pp = new PubPackage(PubPackage.TOPIC_IM_F_PREFIX+"123123/123123", msg, {}, (err) => {
         console.log(err);
       });
       await imHandler.sendMsg({

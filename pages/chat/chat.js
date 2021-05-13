@@ -12,6 +12,7 @@ Page({
      * 页面的初始数据
      */
     data: {
+        friend:{},
         textMessage: '',
         chatItems: [],
         latestPlayVoicePath: '',
@@ -34,8 +35,9 @@ Page({
     onLoad(options) {
         console.log("options.friend = ",options.friend)
         const friend = JSON.parse(options.friend);
-        console.log(friend);
+        // console.log(friend);
         this.setData({
+            friend:friend,
             pageHeight: wx.getSystemInfoSync().windowHeight,
         });
         wx.setNavigationBarTitle({
@@ -45,9 +47,9 @@ Page({
         this.UI = new UI(this);
         this.msgManager = new MsgManager(this);
 
-        this.imOperator.onSimulateReceiveMsg((msg) => {
-            this.msgManager.showMsg({msg})
-        });
+        // this.imOperator.onSimulateReceiveMsg((msg) => {
+        //     this.msgManager.showMsg({msg})
+        // });
         this.UI.updateChatStatus('正在聊天中...');
     },
     onReady() {
@@ -132,9 +134,9 @@ Page({
 
     async sendMsg({content, itemIndex}) {
         try {
-            const {msg} = await this.imOperator.onSimulateSendMsg({content})
+            const msg = await this.imOperator.onSimulateSendMsg({content})
             this.UI.updateViewWhenSendSuccess(msg, itemIndex);
-            return {msg};
+            return msg;
         } catch (e) {
             console.error(e);
             this.UI.updateViewWhenSendFailed(itemIndex);

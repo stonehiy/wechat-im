@@ -49,7 +49,7 @@ const mqttClient = {
   onConnect(success = function () {}) {
     this.ws.on("connect", (e) => {
       console.log(`connectState ${this.pramas.clientId}连接成功:${e}`);
-      success(e);
+      success(this.pramas);
     });
   },
   onError(error = function () {}) {
@@ -72,24 +72,24 @@ const mqttClient = {
       close(e);
     });
   },
-  onMessage(success = function(msgAll){},error = function(){}) {
+  onMessage(success = function (msgAll) {}, error = function () {}) {
     this.ws.on("message", (topic, payload) => {
       console.log("%c收到原始数据：", "color:#0088f5", payload);
       const buf = mybuffer.Buffer.from(payload);
       const msg = buffer2MsgBody(buf);
       const msgAll = new ReMessage();
       msgAll.topic = topic;
-      msgAll.msg =msg
+      msgAll.msg = msg;
       if (null != msg) {
-        success(msgAll)
+        success(msgAll);
       } else {
-        error("data is null")
+        error("data is null");
       }
       console.log("%c解析后的数据：", "color:#0088f5;", msgAll);
     });
   },
 
-  publishMsgBody(data) {
+  publishMsgBody(data, success, fail) {
     data = Object.assign(
       {
         topic: "",
@@ -101,7 +101,15 @@ const mqttClient = {
     );
     const buf = body2Buffer(data.msgBody);
     data.encryptedData = buf;
-    return this.publish(data);
+    this.publish(
+      data,
+      function (res) {
+        success && success(res);
+      },
+      function (err) {
+        fail && fail(err);
+      }
+    );
   },
   /**
    * 自定义mqtt publish (9)
@@ -111,52 +119,50 @@ const mqttClient = {
    * @param {Object} data.options mqtt publish options
    * @param {Object} data.timeOut 超时时间
    */
-  publish(data) {
-    return new Promise((resolve, reject) => {
-      data = Object.assign(
-        {
-          topic: "",
-          encryptedData: [],
-          options: {},
-        },
-        data
-      );
-      if (data.topic === "") {
-        console.error("[publish.topic] can not be undefined");
-        reject("topic data error");
-        return;
-      }
+  publish(data, success = function (res) {}, fail = function (err) {}) {
+    data = Object.assign(
+      {
+        topic: "",
+        encryptedData: [],
+        options: {},
+      },
+      data
+    );
+    if (data.topic === "") {
+      console.error("[publish.topic] can not be undefined");
+      fail && fail("topic data error");
+      return;
+    }
 
-      let buf;
-      if (Array.isArray(data.encryptedData)) {
-        console.log("data.encryptedData is Array");
-        buf = mybuffer.Buffer.from(data.encryptedData);
-      } else if (mybuffer.Buffer.isBuffer(data.encryptedData)) {
-        console.log("data.encryptedData is Buffer");
-        buf = data.encryptedData;
-      } else {
-        console.error("[publish.encryptedData] is not Array or Buffer");
-        reject("data error");
-        return;
-      }
-      console.log(`${data.topic} send msg data :`, data);
-      console.log(`${data.topic} send hex data :`, buf.toString("hex"));
-      // console.log("发送数据:", buf);
-      this.ws.publish(
-        data.topic,
-        buf,
-        Object.assign({ qos: 0 }, data.options),
-        (err) => {
-          if (err) {
-            console.log(err);
-            reject(err);
-          } else {
-            console.log("%c数据发送成功", "color:#ea3800");
-            resolve("send data success!");
-          }
+    let buf;
+    if (Array.isArray(data.encryptedData)) {
+      console.log("data.encryptedData is Array");
+      buf = mybuffer.Buffer.from(data.encryptedData);
+    } else if (mybuffer.Buffer.isBuffer(data.encryptedData)) {
+      console.log("data.encryptedData is Buffer");
+      buf = data.encryptedData;
+    } else {
+      console.error("[publish.encryptedData] is not Array or Buffer");
+      fail && fail("data error");
+      return;
+    }
+    console.log(`${data.topic} send msg data :`, data);
+    console.log(`${data.topic} send hex data :`, buf.toString("hex"));
+    // console.log("发送数据:", buf);
+    this.ws.publish(
+      data.topic,
+      buf,
+      Object.assign({ qos: 0 }, data.options),
+      (err) => {
+        if (err) {
+          console.log(err);
+          fail && fail(err);
+        } else {
+          console.log("%c数据发送成功", "color:#ea3800");
+          success && success(data);
         }
-      );
-    });
+      }
+    );
   },
   end() {
     this.ws.end();

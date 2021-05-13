@@ -101,6 +101,7 @@ Page({
       }
     });
     Array.prototype.push.apply(list, [newItem]);
+    console.log("list = ",list);
     return list;
   },
   getConversationsItem(item) {

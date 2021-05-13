@@ -24,25 +24,29 @@ export class MsgBody {
   static TYPE_VOICE = 0x03;
   static TYPE_VIDEO = 0x04;
 
-  constructor(
-    flag = MsgBody.FlAG_IM,
-    type,
-    from,
-    to,
-    timestamp = new Date().getTime().toString(),
-    content,
- 
-  ) {
-    this.flag = flag;
-    this.type = type;
-    this.from = from;
-    this.to = to;
-    this.timestamp = timestamp;
-    this.content = content;
+  constructor(options) {
+    const defaults = {
+      flag: MsgBody.FlAG_IM,
+      type: MsgBody.TYPE_TEXT,
+      from: "",
+      to: "",
+      timestamp: new Date().getTime().toString(),
+      content: "",
+    };
+
+    let opts = Object.assign({}, defaults, options);
+    this.flag = opts.flag;
+    this.type = opts.type;
+    this.from = opts.from;
+    this.to = opts.to;
+    this.timestamp = opts.timestamp;
+    this.content = opts.content;
   }
 }
 
 export class PubPackage {
+  static TOPIC_IM_F_PREFIX = "ims/f/";
+  static TOPIC_IM_G_PREFIX = "ims/g/";
   constructor(
     topic,
     msgBody,
@@ -128,14 +132,14 @@ export function buffer2MsgBody(buffer) {
 
   const content = buffer.toString("utf8", 26);
 
-  return new MsgBody(
-    flag,
-    type,
-    from.toString(),
-    to.toString(),
-    timestam.toString(),
-    content
-  );
+  return new MsgBody({
+    flag: flag,
+    type: type,
+    from: from.toString(),
+    to: to.toString(),
+    timestam: timestam.toString(),
+    content: content,
+  });
 }
 
 export default {
